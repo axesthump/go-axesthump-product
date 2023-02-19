@@ -37,7 +37,7 @@ type (
 		Items []models.CreateOrderItem `json:"items"`
 	}
 	CreateOrderResponse struct {
-		OrderID int64
+		OrderID int64 `json:"orderID"`
 	}
 )
 
@@ -52,7 +52,7 @@ func (c *Client) GetStocks(ctx context.Context, sku uint32) ([]models.Stock, err
 
 func (c *Client) CreateOrder(ctx context.Context, user int64, items []models.CreateOrderItem) error {
 	request := CreateOrderRequest{User: user, Items: items}
-	_, err := clientwrapper.SendRequest[CreateOrderRequest, CreateOrderResponse](ctx, request, c.urlStocks)
+	_, err := clientwrapper.SendRequest[CreateOrderRequest, CreateOrderResponse](ctx, request, c.urlCreateOrder)
 	if err != nil {
 		return errors.WithMessage(err, "create order")
 	}
