@@ -50,11 +50,15 @@ func (c *Client) GetStocks(ctx context.Context, sku uint32) ([]models.Stock, err
 	return response.Stocks, nil
 }
 
-func (c *Client) CreateOrder(ctx context.Context, user int64, items []models.CreateOrderItem) error {
+func (c *Client) CreateOrder(
+	ctx context.Context,
+	user int64,
+	items []models.CreateOrderItem,
+) (int64, error) {
 	request := CreateOrderRequest{User: user, Items: items}
-	_, err := clientwrapper.SendRequest[CreateOrderRequest, CreateOrderResponse](ctx, request, c.urlCreateOrder)
+	res, err := clientwrapper.SendRequest[CreateOrderRequest, CreateOrderResponse](ctx, request, c.urlCreateOrder)
 	if err != nil {
-		return errors.WithMessage(err, "create order")
+		return -1, errors.WithMessage(err, "create order")
 	}
-	return nil
+	return res.OrderID, nil
 }

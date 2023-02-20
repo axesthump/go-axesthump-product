@@ -7,7 +7,7 @@ import (
 )
 
 type purchase interface {
-	Purchase(ctx context.Context, user int64) error
+	Purchase(ctx context.Context, user int64) (int64, error)
 }
 
 type Handler struct {
@@ -18,7 +18,9 @@ type (
 	Request struct {
 		User int64 `json:"user"`
 	}
+
 	Response struct {
+		OrderID int64 `json:"orderID"`
 	}
 )
 
@@ -35,6 +37,12 @@ func (r Request) Validate() error {
 
 func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
 	log.Printf("purchase: %+v", req)
-	err := h.service.Purchase(ctx, req.User)
-	return Response{}, err
+
+	orderID, err := h.service.Purchase(ctx, req.User)
+	var response Response
+	if err != nil {
+		return response, err
+	}
+	response.OrderID = orderID
+	return response, nil
 }

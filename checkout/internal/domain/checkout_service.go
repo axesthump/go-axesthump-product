@@ -16,7 +16,7 @@ type ProductsChecker interface {
 }
 
 type CreateOrderChecker interface {
-	CreateOrder(ctx context.Context, user int64, items []models.CreateOrderItem) error
+	CreateOrder(ctx context.Context, user int64, items []models.CreateOrderItem) (int64, error)
 }
 
 type Service struct {
@@ -97,14 +97,14 @@ func (s *Service) ListCart(ctx context.Context, user int64) (*models.CartInfo, e
 	return &cartInfo, nil
 }
 
-func (s *Service) Purchase(ctx context.Context, user int64) error {
+func (s *Service) Purchase(ctx context.Context, user int64) (int64, error) {
 	items := []models.CreateOrderItem{
 		{Sku: 1, Count: 10},
 		{Sku: 2, Count: 20},
 	}
-	err := s.createOrderChecker.CreateOrder(ctx, user, items)
+	res, err := s.createOrderChecker.CreateOrder(ctx, user, items)
 	if err != nil {
-		return errors.WithMessage(err, "purchase")
+		return res, errors.WithMessage(err, "purchase")
 	}
-	return nil
+	return res, nil
 }
