@@ -2,24 +2,22 @@ package loms
 
 import (
 	"context"
+	"fmt"
+	"route256/checkout/internal/config"
 	"route256/checkout/internal/models"
 	"route256/libs/clientwrapper"
-
-	"github.com/pkg/errors"
 )
 
 type Client struct {
-	url            string
-	urlStocks      string
-	urlCreateOrder string
 }
 
-func New(url string) *Client {
-	return &Client{
-		url:            url,
-		urlCreateOrder: url + "/createOrder",
-		urlStocks:      url + "/stocks",
-	}
+const (
+	stocksURL      = "/stocks"
+	createOrderURL = "/createOrder"
+)
+
+func New() *Client {
+	return &Client{}
 }
 
 type (
@@ -43,9 +41,13 @@ type (
 
 func (c *Client) GetStocks(ctx context.Context, sku uint32) ([]models.Stock, error) {
 	request := StocksRequest{SKU: sku}
-	response, err := clientwrapper.SendRequest[StocksRequest, StocksResponse](ctx, request, c.urlStocks)
+	response, err := clientwrapper.SendRequest[StocksRequest, StocksResponse](
+		ctx,
+		request,
+		config.ConfigData.Services.Loms+stocksURL,
+	)
 	if err != nil {
-		return nil, errors.WithMessage(err, "get stocks")
+		return nil, fmt.Errorf("get stocks: %w", err)
 	}
 	return response.Stocks, nil
 }
@@ -56,9 +58,13 @@ func (c *Client) CreateOrder(
 	items []models.CreateOrderItem,
 ) (int64, error) {
 	request := CreateOrderRequest{User: user, Items: items}
-	res, err := clientwrapper.SendRequest[CreateOrderRequest, CreateOrderResponse](ctx, request, c.urlCreateOrder)
+	res, err := clientwrapper.SendRequest[CreateOrderRequest, CreateOrderResponse](
+		ctx,
+		request,
+		config.ConfigData.Services.Loms+createOrderURL,
+	)
 	if err != nil {
-		return -1, errors.WithMessage(err, "create order")
+		return -1, fmt.Errorf("create order: %w", err)
 	}
 	return res.OrderID, nil
 }

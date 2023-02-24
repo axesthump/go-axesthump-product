@@ -8,15 +8,12 @@ import (
 )
 
 type Client struct {
-	url           string
-	urlGetProduct string
 }
 
-func New(url string) *Client {
-	return &Client{
-		url:           url,
-		urlGetProduct: url + "/get_product",
-	}
+const getProductURL = "/get_product"
+
+func New() *Client {
+	return &Client{}
 }
 
 type (
@@ -34,7 +31,11 @@ func (c *Client) GetProducts(ctx context.Context, skus []uint32) ([]models.Produ
 	products := make([]models.Product, len(skus))
 	for i, sku := range skus {
 		request := GetProductRequest{Token: config.ConfigData.Token, SKU: sku}
-		response, err := clientwrapper.SendRequest[GetProductRequest, GetProductResponse](ctx, request, c.urlGetProduct)
+		response, err := clientwrapper.SendRequest[GetProductRequest, GetProductResponse](
+			ctx,
+			request,
+			config.ConfigData.Services.ProductService+getProductURL,
+		)
 		if err != nil {
 			return nil, err
 		}

@@ -2,9 +2,9 @@ package domain
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"route256/checkout/internal/models"
-
-	"github.com/pkg/errors"
 )
 
 type StocksChecker interface {
@@ -44,7 +44,7 @@ func New(
 func (s *Service) AddToCart(ctx context.Context, user int64, sku uint32, count uint16) error {
 	stocks, err := s.stocksChecker.GetStocks(ctx, sku)
 	if err != nil {
-		return errors.WithMessage(err, "checking stocks")
+		return fmt.Errorf("checking stocks: %w", err)
 	}
 
 	counter := int64(count)
@@ -78,7 +78,7 @@ func (s *Service) ListCart(ctx context.Context, user int64) (*models.CartInfo, e
 
 	products, err := s.productsChecker.GetProducts(ctx, skus)
 	if err != nil {
-		return nil, errors.WithMessage(err, "get products")
+		return nil, fmt.Errorf("get products: %w", err)
 	}
 	items := make([]models.Item, 0, len(products))
 	cartInfo := models.CartInfo{Items: items}
@@ -104,7 +104,7 @@ func (s *Service) Purchase(ctx context.Context, user int64) (int64, error) {
 	}
 	res, err := s.createOrderChecker.CreateOrder(ctx, user, items)
 	if err != nil {
-		return res, errors.WithMessage(err, "purchase")
+		return res, fmt.Errorf("purchase: %w", err)
 	}
 	return res, nil
 }

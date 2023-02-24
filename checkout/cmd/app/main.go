@@ -21,8 +21,8 @@ func main() {
 	if err != nil {
 		log.Fatal("config init", err)
 	}
-	lomsClient := loms.New(config.ConfigData.Services.Loms)
-	productServiceClient := productservice.New(config.ConfigData.Services.ProductService)
+	lomsClient := loms.New()
+	productServiceClient := productservice.New()
 	service := domain.New(lomsClient, productServiceClient, lomsClient)
 	addToCartHandler := addtocart.New(service)
 	deleteFromCartHandler := deletefromcart.New(service)

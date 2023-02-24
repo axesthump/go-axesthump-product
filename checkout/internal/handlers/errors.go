@@ -1,6 +1,6 @@
 package handlers
 
-import "github.com/pkg/errors"
+import "errors"
 
 var (
 	ErrEmptyUser = errors.New("empty user")
