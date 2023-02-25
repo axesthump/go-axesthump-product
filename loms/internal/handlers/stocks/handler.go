@@ -13,7 +13,7 @@ type getStocks interface {
 
 type (
 	Request struct {
-		SKU int64 `json:"sku"`
+		Sku int64 `json:"sku"`
 	}
 
 	Response struct {
@@ -22,7 +22,7 @@ type (
 )
 
 func (r Request) Validate() error {
-	if r.SKU == 0 {
+	if r.Sku == 0 {
 		return handlers.ErrEmptyOrderID
 	}
 	return nil
@@ -38,7 +38,7 @@ func New(service getStocks) *Handler {
 
 func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
 	log.Printf("stocks: %+v", req)
-	stocks, err := h.service.GetStocks(ctx, req.SKU)
+	stocks, err := h.service.GetStocks(ctx, req.Sku)
 	var response Response
 	if err != nil {
 		return response, err

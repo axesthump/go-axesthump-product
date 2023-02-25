@@ -22,7 +22,7 @@ func New() *Client {
 
 type (
 	StocksRequest struct {
-		SKU uint32 `json:"sku"`
+		Sku uint32 `json:"sku"`
 	}
 	StocksResponse struct {
 		Stocks []models.Stock `json:"stocks"`
@@ -40,7 +40,7 @@ type (
 )
 
 func (c *Client) GetStocks(ctx context.Context, sku uint32) ([]models.Stock, error) {
-	request := StocksRequest{SKU: sku}
+	request := StocksRequest{Sku: sku}
 	response, err := clientwrapper.SendRequest[StocksRequest, StocksResponse](
 		ctx,
 		request,
@@ -64,7 +64,7 @@ func (c *Client) CreateOrder(
 		config.ConfigData.Services.Loms+createOrderURL,
 	)
 	if err != nil {
-		return -1, fmt.Errorf("create order: %w", err)
+		return 0, fmt.Errorf("create order: %w", err)
 	}
 	return res.OrderID, nil
 }

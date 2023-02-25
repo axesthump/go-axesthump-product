@@ -9,14 +9,15 @@ import (
 )
 
 func SendRequest[Req any, Res any](ctx context.Context, req Req, url string) (Res, error) {
-	rawJSON, err := json.Marshal(req)
+	buff := new(bytes.Buffer)
+	err := json.NewEncoder(buff).Encode(req)
 	var response Res
 
 	if err != nil {
 		return response, fmt.Errorf("marshaling json: %w", err)
 	}
 
-	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(rawJSON))
+	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, url, buff)
 	if err != nil {
 		return response, fmt.Errorf("creating http request: %w", err)
 	}

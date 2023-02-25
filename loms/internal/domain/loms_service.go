@@ -18,8 +18,8 @@ func (s *Service) CreateOrder(ctx context.Context, user int64, items []models.It
 
 func (s *Service) ListOrder(ctx context.Context, orderID int64) (models.OrderInfo, error) {
 	items := []models.Item{
-		{SKU: 1, Count: 2},
-		{SKU: 5, Count: 21},
+		{Sku: 1, Count: 2},
+		{Sku: 5, Count: 21},
 	}
 	return models.OrderInfo{
 		Status: "new",

@@ -47,9 +47,9 @@ func (w *Wrapper[Req, Res]) ServeHTTP(resWriter http.ResponseWriter, httpReq *ht
 		sendResponse(resWriter, http.StatusInternalServerError, getErrorResponse("running handler", err))
 		return
 	}
-
-	rawJSON, _ := json.Marshal(response)
-	sendResponse(resWriter, http.StatusOK, rawJSON)
+	buff := new(bytes.Buffer)
+	_ = json.NewEncoder(buff).Encode(response)
+	sendResponse(resWriter, http.StatusOK, buff.Bytes())
 }
 
 func sendResponse(w http.ResponseWriter, status int, body []byte) {

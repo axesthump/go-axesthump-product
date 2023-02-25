@@ -87,7 +87,7 @@ func (s *Service) ListCart(ctx context.Context, user int64) (*models.CartInfo, e
 		cartInfo.Items = append(
 			cartInfo.Items,
 			models.Item{
-				SKU:   1,
+				Sku:   1,
 				Count: 2,
 				Name:  product.Name,
 				Price: product.Price,

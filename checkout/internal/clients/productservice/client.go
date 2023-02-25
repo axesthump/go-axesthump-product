@@ -19,7 +19,7 @@ func New() *Client {
 type (
 	GetProductRequest struct {
 		Token string `json:"token"`
-		SKU   uint32 `json:"sku"`
+		Sku   uint32 `json:"sku"`
 	}
 
 	GetProductResponse struct {
@@ -30,7 +30,7 @@ type (
 func (c *Client) GetProducts(ctx context.Context, skus []uint32) ([]models.Product, error) {
 	products := make([]models.Product, len(skus))
 	for i, sku := range skus {
-		request := GetProductRequest{Token: config.ConfigData.Token, SKU: sku}
+		request := GetProductRequest{Token: config.ConfigData.Token, Sku: sku}
 		response, err := clientwrapper.SendRequest[GetProductRequest, GetProductResponse](
 			ctx,
 			request,

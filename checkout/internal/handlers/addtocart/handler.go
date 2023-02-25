@@ -33,7 +33,7 @@ func (r Request) Validate() error {
 		return handlers.ErrEmptyUser
 	}
 	if r.Sku == 0 {
-		return handlers.ErrEmptySKU
+		return handlers.ErrEmptySku
 	}
 	return nil
 }

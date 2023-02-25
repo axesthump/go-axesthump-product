@@ -4,5 +4,5 @@ import "errors"
 
 var (
 	ErrEmptyUser = errors.New("empty user")
-	ErrEmptySKU  = errors.New("empty sku")
+	ErrEmptySku  = errors.New("empty sku")
 )
