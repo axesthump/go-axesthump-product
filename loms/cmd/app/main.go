@@ -1,33 +1,33 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"net/http"
-	"route256/libs/srvwrapper"
-	"route256/loms/internal/domain"
-	"route256/loms/internal/handlers/cancelorder"
-	"route256/loms/internal/handlers/createorder"
-	"route256/loms/internal/handlers/listorder"
-	"route256/loms/internal/handlers/orderpayed"
-	"route256/loms/internal/handlers/stocks"
+	"net"
+	lomsV1 "route256/loms/internal/api/loms_v1"
+	"route256/loms/internal/domain/loms"
+	desc "route256/loms/pkg/loms_v1"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const port = ":8081"
 
 func main() {
-	service := domain.New()
-	createOrderHandler := createorder.New(service)
-	listOrderHandler := listorder.New(service)
-	orderPayedHandler := orderpayed.New(service)
-	cancelOrderHandler := cancelorder.New(service)
-	stocksHandler := stocks.New(service)
-	http.Handle("/createOrder", srvwrapper.New(createOrderHandler.Handle))
-	http.Handle("/listOrder", srvwrapper.New(listOrderHandler.Handle))
-	http.Handle("/orderPayed", srvwrapper.New(orderPayedHandler.Handle))
-	http.Handle("/cancelOrder", srvwrapper.New(cancelOrderHandler.Handle))
-	http.Handle("/stocks", srvwrapper.New(stocksHandler.Handle))
+	l, err := net.Listen("tcp", fmt.Sprintf("%v", port))
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	log.Println("listening http at", port)
-	err := http.ListenAndServe(port, nil)
-	log.Fatal("cannot listen http", err)
+	s := grpc.NewServer()
+	reflection.Register(s)
+
+	service := loms.New()
+	desc.RegisterLomsV1Server(s, lomsV1.New(service))
+	log.Printf("server listening at %v", l.Addr())
+
+	if err = s.Serve(l); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
