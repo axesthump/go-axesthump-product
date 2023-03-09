@@ -12,11 +12,11 @@ func (c *Client) Stocks(ctx context.Context, sku uint32) ([]models.Stock, error)
 	if err != nil {
 		return nil, err
 	}
-	res := toStocks(stocks)
+	res := convertToModel(stocks)
 	return res, nil
 }
 
-func toStocks(stocks *lomsAPI.StocksResponse) []models.Stock {
+func convertToModel(stocks *lomsAPI.StocksResponse) []models.Stock {
 	convertedStocks := make([]models.Stock, len(stocks.GetStocks()))
 	for i, stock := range stocks.GetStocks() {
 		convertedStocks[i] = models.Stock{

@@ -38,7 +38,7 @@ func toItemDesc(items []models.Item) []*desc.Item {
 	return descItems
 }
 
-func getStatusDesc(status models.OrderStatus) desc.OrderStatus {
+func getStatusDesc(status models.OrderStatusID) desc.OrderStatus {
 	switch status {
 	case models.New:
 		return desc.OrderStatus_new

@@ -1,9 +1,9 @@
 package models
 
-type OrderStatus int
+type OrderStatusID int
 
 const (
-	Nil = iota
+	UnknownOrderStatusID OrderStatusID = iota
 	New
 	AwaitingPayment
 	Failed

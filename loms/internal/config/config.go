@@ -8,13 +8,6 @@ import (
 )
 
 type ConfigStruct struct {
-	Token string `yaml:"token"`
-
-	Services struct {
-		Loms           string `yaml:"loms"`
-		ProductService string `yaml:"product_service"`
-	} `yaml:"services"`
-
 	Postgres struct {
 		Url string `yaml:"url"`
 	} `yaml:"postgres"`
