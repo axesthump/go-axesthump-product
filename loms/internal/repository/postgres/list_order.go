@@ -7,10 +7,12 @@ import (
 )
 
 func (r *LomsRepository) ListOrder(ctx context.Context, orderID int64) (models.OrderInfo, error) {
-	query := `SELECT o.status, o.user_id, sku, count
+	const query = `
+	SELECT o.status, o.user_id, sku, count
 	FROM orders o
 	INNER JOIN order_items oi on o.id = oi.order_id
-	WHERE o.id = $1;`
+	WHERE o.id = $1;
+	`
 
 	rows, err := r.pool.Query(ctx, query, orderID)
 	if err != nil {

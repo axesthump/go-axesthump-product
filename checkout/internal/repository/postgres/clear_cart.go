@@ -9,7 +9,12 @@ import (
 
 func (r *CheckoutRepository) ClearCart(ctx context.Context, user int64) error {
 	err := r.inTx(ctx, func(ctx context.Context, tx pgx.Tx) error {
-		query := `SELECT id FROM carts WHERE user_id = $1`
+		const query = `
+		SELECT id
+		FROM carts 
+		WHERE user_id = $1;
+		`
+
 		var cartID int64
 		err := tx.QueryRow(ctx, query, user).Scan(&cartID)
 		if err != nil {
@@ -34,8 +39,12 @@ func (r *CheckoutRepository) ClearCart(ctx context.Context, user int64) error {
 }
 
 func (r *CheckoutRepository) deleteCartItems(ctx context.Context, tx pgx.Tx, err error, cartID int64) error {
-	queryDeleteCartItems := `DELETE FROM cart_items where cart_id = $1`
-	_, err = tx.Exec(ctx, queryDeleteCartItems, cartID)
+	const query = `
+	DELETE FROM cart_items 
+	WHERE cart_id = $1;
+	`
+
+	_, err = tx.Exec(ctx, query, cartID)
 	if err != nil {
 		return fmt.Errorf("postgres deleteCartItems: %w", err)
 	}
@@ -43,9 +52,12 @@ func (r *CheckoutRepository) deleteCartItems(ctx context.Context, tx pgx.Tx, err
 }
 
 func (r *CheckoutRepository) deleteCart(ctx context.Context, tx pgx.Tx, err error, cartID int64) error {
-	queryDeleteCart := `DELETE FROM carts where id = $1`
+	const query = `
+	DELETE FROM carts 
+	WHERE id = $1;
+	`
 
-	_, err = tx.Exec(ctx, queryDeleteCart, cartID)
+	_, err = tx.Exec(ctx, query, cartID)
 	if err != nil {
 		return fmt.Errorf("postgres deleteCart: %w", err)
 	}

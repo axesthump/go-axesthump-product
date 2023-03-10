@@ -10,9 +10,11 @@ import (
 )
 
 func (r *LomsRepository) Stocks(ctx context.Context, sku uint32) ([]models.Stock, error) {
-	query := `SELECT warehouse_id, available 
+	const query = `
+	SELECT warehouse_id, available 
 	FROM warehouses_items 
-	WHERE sku = $1 AND available > 0;`
+	WHERE sku = $1 AND available > 0;
+	`
 
 	rows, err := r.pool.Query(ctx, query, sku)
 	defer rows.Close()

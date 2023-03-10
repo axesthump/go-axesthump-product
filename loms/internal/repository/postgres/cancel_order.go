@@ -38,9 +38,11 @@ func (r *LomsRepository) updateReservedItems(
 	tx pgx.Tx,
 	reservedItem reservedItemsInWarehouses,
 ) error {
-	query := `UPDATE warehouses_items 
+	const query = `
+	UPDATE warehouses_items 
 	SET reserved = reserved - $1, available = available + $1
-	WHERE warehouse_id = $2 AND sku = $3;`
+	WHERE warehouse_id = $2 AND sku = $3;
+	`
 
 	_, err := tx.Exec(ctx, query, reservedItem.itemCount, reservedItem.warehouseID, reservedItem.itemSku)
 	if err != nil {

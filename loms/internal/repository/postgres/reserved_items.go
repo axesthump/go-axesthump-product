@@ -66,11 +66,13 @@ func (r *LomsRepository) ReservedItems(ctx context.Context, orderID int64) error
 }
 
 func (r *LomsRepository) getOrdersSetData(ctx context.Context, tx pgx.Tx, orderID int64) ([]orderSetData, error) {
-	queryOrderSet := `SELECT sku, count, id
+	const query = `
+	SELECT sku, count, id
 	FROM order_items
-	WHERE order_id = $1;`
+	WHERE order_id = $1;
+	`
 
-	rows, err := tx.Query(ctx, queryOrderSet, orderID)
+	rows, err := tx.Query(ctx, query, orderID)
 	if err != nil {
 		return nil, fmt.Errorf("postgres getOrdersSetData select: %w", err)
 	}
@@ -97,12 +99,14 @@ func (r *LomsRepository) getPossibleReservedItemsInfo(
 	warehouseReservedItemsInfo := make([]warehouseReservedItems, 0)
 
 	for _, orderSetInfo := range ordersSetData {
-		queryWarehouseItems := `SELECT available, warehouse_id
+		const query = `
+		SELECT available, warehouse_id
 		FROM warehouses_items
 		WHERE sku = $1 AND available > 0
-		ORDER BY available DESC;`
+		ORDER BY available DESC;
+		`
 
-		warehouseItemsRows, err := tx.Query(ctx, queryWarehouseItems, orderSetInfo.sku)
+		warehouseItemsRows, err := tx.Query(ctx, query, orderSetInfo.sku)
 		if err != nil {
 			return nil, fmt.Errorf("postgres getPossibleReservedItemsInfo select: %w", err)
 		}
@@ -153,10 +157,13 @@ func (r *LomsRepository) updateWarehousesItems(
 	tx pgx.Tx,
 	wInfo warehouseReservedItems,
 ) error {
-	queryWarehouseItems := `UPDATE warehouses_items
-		SET available = available - $1, reserved = reserved + $1
-		WHERE warehouse_id = $2 AND sku = $3`
-	_, err := tx.Exec(ctx, queryWarehouseItems, wInfo.count, wInfo.warehouseID, wInfo.itemSku)
+	const query = `
+	UPDATE warehouses_items
+	SET available = available - $1, reserved = reserved + $1
+	WHERE warehouse_id = $2 AND sku = $3;
+	`
+
+	_, err := tx.Exec(ctx, query, wInfo.count, wInfo.warehouseID, wInfo.itemSku)
 	if err != nil {
 		return fmt.Errorf("postgres updateWarehousesItems: %w", err)
 	}
@@ -168,9 +175,12 @@ func (r *LomsRepository) insertOrdersSetCountInWarehouse(
 	tx pgx.Tx,
 	wInfo warehouseReservedItems,
 ) error {
-	queryOrderSetCount := `INSERT INTO order_items_count_in_warehouse(count, warehouse_id, order_items_id)
-	VALUES ($1, $2, $3)`
-	_, err := tx.Exec(ctx, queryOrderSetCount, wInfo.count, wInfo.warehouseID, wInfo.orderSetID)
+	const query = `
+	INSERT INTO order_items_count_in_warehouse(count, warehouse_id, order_items_id)
+	VALUES ($1, $2, $3);
+	`
+
+	_, err := tx.Exec(ctx, query, wInfo.count, wInfo.warehouseID, wInfo.orderSetID)
 	if err != nil {
 		return fmt.Errorf("postgres insertOrdersSetCountInWarehouse: %w", err)
 	}
@@ -178,11 +188,13 @@ func (r *LomsRepository) insertOrdersSetCountInWarehouse(
 }
 
 func (r *LomsRepository) updateStatus(ctx context.Context, tx pgx.Tx, status models.OrderStatusID, orderID int64) error {
-	queryOrder := `UPDATE orders
+	const query = `
+	UPDATE orders
 	SET status = $1
-	WHERE id = $2;`
+	WHERE id = $2;
+	`
 
-	_, err := tx.Exec(ctx, queryOrder, status, orderID)
+	_, err := tx.Exec(ctx, query, status, orderID)
 	if err != nil {
 		return fmt.Errorf("postgres updateStatus: %w", err)
 	}

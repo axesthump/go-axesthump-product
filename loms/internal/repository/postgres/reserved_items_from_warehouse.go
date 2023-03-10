@@ -18,11 +18,13 @@ func (r *LomsRepository) getReservedItemsInWarehousesFromOrder(
 	tx pgx.Tx,
 	orderID int64,
 ) ([]reservedItemsInWarehouses, error) {
-	query := `SELECT wi.sku, wi.warehouse_id, osciw.count
+	const query = `
+	SELECT wi.sku, wi.warehouse_id, osciw.count
 	FROM warehouses_items wi
 	INNER JOIN order_items oi on oi.order_id = $1
 	INNER JOIN order_items_count_in_warehouse osciw on oi.id = osciw.order_items_id
-	WHERE wi.sku = oi.sku AND osciw.warehouse_id = wi.warehouse_id;`
+	WHERE wi.sku = oi.sku AND osciw.warehouse_id = wi.warehouse_id;
+	`
 
 	rows, err := tx.Query(ctx, query, orderID)
 	if err != nil {

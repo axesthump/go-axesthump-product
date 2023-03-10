@@ -7,10 +7,12 @@ import (
 )
 
 func (r *CheckoutRepository) ListCart(ctx context.Context, user int64) ([]models.Item, error) {
-	query := `SELECT sku, count 
+	const query = `
+	SELECT sku, count 
 	FROM cart_items ci
 	INNER JOIN carts c 
-	ON c.user_id = $1 AND c.id = ci.cart_id AND ci.count > 0;`
+	ON c.user_id = $1 AND c.id = ci.cart_id AND ci.count > 0;
+	`
 
 	rows, err := r.pool.Query(ctx, query, user)
 	if err != nil {

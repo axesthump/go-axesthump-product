@@ -9,10 +9,14 @@ import (
 )
 
 func (r *CheckoutRepository) AddToCart(ctx context.Context, user int64, sku uint32, count uint32) error {
+	const query = `
+	SELECT id 
+	FROM carts 
+	WHERE user_id = $1;
+	`
 
-	queryCart := "SELECT id FROM carts WHERE user_id = $1;"
 	var cartID int64
-	err := r.pool.QueryRow(ctx, queryCart, user).Scan(&cartID)
+	err := r.pool.QueryRow(ctx, query, user).Scan(&cartID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return r.createCart(ctx, user, sku, count)
@@ -30,9 +34,14 @@ func (r *CheckoutRepository) addItems(
 	sku uint32,
 	count uint32,
 ) error {
-	queryCartItems := "SELECT id FROM cart_items WHERE cart_id = $1 AND sku = $2"
+	const query = `
+	SELECT id 
+	FROM cart_items 
+	WHERE cart_id = $1 AND sku = $2;
+	`
+
 	var cartItemID int64
-	err = r.pool.QueryRow(ctx, queryCartItems, cartID, sku).Scan(&cartItemID)
+	err = r.pool.QueryRow(ctx, query, cartID, sku).Scan(&cartItemID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return r.insertCartItems(ctx, sku, count, cartID)
@@ -44,8 +53,13 @@ func (r *CheckoutRepository) addItems(
 }
 
 func (r *CheckoutRepository) updateItems(ctx context.Context, err error, count uint32, cartItemID int64, sku uint32) error {
-	queryUpdate := "UPDATE cart_items SET count = count+$1 WHERE id = $2 AND sku = $3;"
-	_, err = r.pool.Exec(ctx, queryUpdate, count, cartItemID, sku)
+	const query = `
+	UPDATE cart_items
+	SET count = count+$1
+	WHERE id = $2 AND sku = $3;
+	`
+
+	_, err = r.pool.Exec(ctx, query, count, cartItemID, sku)
 	if err != nil {
 		return fmt.Errorf("postgres updateItems: %w", err)
 	}
@@ -54,7 +68,12 @@ func (r *CheckoutRepository) updateItems(ctx context.Context, err error, count u
 
 func (r *CheckoutRepository) createCart(ctx context.Context, user int64, sku uint32, count uint32) error {
 	err := r.inTx(ctx, func(ctx context.Context, tx pgx.Tx) error {
-		query := "INSERT INTO carts (user_id) VALUES ($1) RETURNING id;"
+		const query = `
+		INSERT INTO carts (user_id) 
+		VALUES ($1) 
+		RETURNING id;
+		`
+
 		var cartID int64
 		err := tx.QueryRow(ctx, query, user).Scan(&cartID)
 		if err != nil {
@@ -75,7 +94,11 @@ func (r *CheckoutRepository) createCart(ctx context.Context, user int64, sku uin
 }
 
 func (r *CheckoutRepository) insertCartItems(ctx context.Context, sku uint32, count uint32, cartID int64) error {
-	query := "INSERT INTO cart_items (sku, count, cart_id) VALUES ($1, $2, $3);"
+	const query = `
+	INSERT INTO cart_items (sku, count, cart_id)
+	VALUES ($1, $2, $3);
+	`
+
 	var err error
 	_, err = r.pool.Exec(ctx, query, sku, count, cartID)
 	if err != nil {
@@ -85,7 +108,11 @@ func (r *CheckoutRepository) insertCartItems(ctx context.Context, sku uint32, co
 }
 
 func (r *CheckoutRepository) insertCartItemsTx(ctx context.Context, tx pgx.Tx, sku uint32, count uint32, cartID int64) error {
-	query := "INSERT INTO cart_items (sku, count, cart_id) VALUES ($1, $2, $3);"
+	const query = `
+	INSERT INTO cart_items (sku, count, cart_id)
+	VALUES ($1, $2, $3);
+	`
+
 	var err error
 	_, err = tx.Exec(ctx, query, sku, count, cartID)
 	if err != nil {
