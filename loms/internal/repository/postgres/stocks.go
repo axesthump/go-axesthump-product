@@ -17,14 +17,13 @@ func (r *LomsRepository) Stocks(ctx context.Context, sku uint32) ([]models.Stock
 	`
 
 	rows, err := r.pool.Query(ctx, query, sku)
-	defer rows.Close()
-
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return []models.Stock{}, nil
 		}
 		return nil, fmt.Errorf("postgres Stocks select: %w", err)
 	}
+	defer rows.Close()
 
 	stocks := make([]models.Stock, 0, 5)
 	for rows.Next() {

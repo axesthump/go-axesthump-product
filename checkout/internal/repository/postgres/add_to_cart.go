@@ -24,12 +24,11 @@ func (r *CheckoutRepository) AddToCart(ctx context.Context, user int64, sku uint
 		return fmt.Errorf("postgres AddToCart: %w", err)
 	}
 
-	return r.addItems(ctx, err, cartID, sku, count)
+	return r.addItems(ctx, cartID, sku, count)
 }
 
 func (r *CheckoutRepository) addItems(
 	ctx context.Context,
-	err error,
 	cartID int64,
 	sku uint32,
 	count uint32,
@@ -41,7 +40,7 @@ func (r *CheckoutRepository) addItems(
 	`
 
 	var cartItemID int64
-	err = r.pool.QueryRow(ctx, query, cartID, sku).Scan(&cartItemID)
+	err := r.pool.QueryRow(ctx, query, cartID, sku).Scan(&cartItemID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return r.insertCartItems(ctx, sku, count, cartID)
@@ -49,17 +48,17 @@ func (r *CheckoutRepository) addItems(
 		return fmt.Errorf("postgres addItems: %w", err)
 	}
 
-	return r.updateItems(ctx, err, count, cartItemID, sku)
+	return r.updateItems(ctx, count, cartItemID, sku)
 }
 
-func (r *CheckoutRepository) updateItems(ctx context.Context, err error, count uint32, cartItemID int64, sku uint32) error {
+func (r *CheckoutRepository) updateItems(ctx context.Context, count uint32, cartItemID int64, sku uint32) error {
 	const query = `
 	UPDATE cart_items
 	SET count = count+$1
 	WHERE id = $2 AND sku = $3;
 	`
 
-	_, err = r.pool.Exec(ctx, query, count, cartItemID, sku)
+	_, err := r.pool.Exec(ctx, query, count, cartItemID, sku)
 	if err != nil {
 		return fmt.Errorf("postgres updateItems: %w", err)
 	}

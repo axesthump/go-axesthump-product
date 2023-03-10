@@ -3,8 +3,9 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v4"
 	"route256/loms/internal/models"
+
+	"github.com/jackc/pgx/v4"
 )
 
 func (r *LomsRepository) CreateOrder(ctx context.Context, order models.OrderData) (orderID int64, err error) {
@@ -19,7 +20,7 @@ func (r *LomsRepository) CreateOrder(ctx context.Context, order models.OrderData
 		if err != nil {
 			return err
 		}
-		err = r.insertInOrderItems(ctx, tx, order, err, orderID)
+		err = r.insertInOrderItems(ctx, tx, order, orderID)
 		if err != nil {
 			return err
 		}
@@ -32,14 +33,14 @@ func (r *LomsRepository) CreateOrder(ctx context.Context, order models.OrderData
 	return orderID, nil
 }
 
-func (r *LomsRepository) insertInOrderItems(ctx context.Context, tx pgx.Tx, order models.OrderData, err error, orderID int64) error {
+func (r *LomsRepository) insertInOrderItems(ctx context.Context, tx pgx.Tx, order models.OrderData, orderID int64) error {
 	for _, item := range order.Items {
 		const query = `
 		INSERT INTO order_items(sku, count, order_id)
 		VALUES ($1, $2, $3);
 		`
 
-		_, err = tx.Exec(ctx, query, item.Sku, item.Count, orderID)
+		_, err := tx.Exec(ctx, query, item.Sku, item.Count, orderID)
 		if err != nil {
 			return fmt.Errorf("postgres insertInOrderItems: %w", err)
 		}

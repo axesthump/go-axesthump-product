@@ -21,12 +21,12 @@ func (r *CheckoutRepository) ClearCart(ctx context.Context, user int64) error {
 			return err
 		}
 
-		err = r.deleteCart(ctx, tx, err, cartID)
+		err = r.deleteCart(ctx, tx, cartID)
 		if err != nil {
 			return err
 		}
 
-		err = r.deleteCartItems(ctx, tx, err, cartID)
+		err = r.deleteCartItems(ctx, tx, cartID)
 		if err != nil {
 			return err
 		}
@@ -38,26 +38,26 @@ func (r *CheckoutRepository) ClearCart(ctx context.Context, user int64) error {
 	return nil
 }
 
-func (r *CheckoutRepository) deleteCartItems(ctx context.Context, tx pgx.Tx, err error, cartID int64) error {
+func (r *CheckoutRepository) deleteCartItems(ctx context.Context, tx pgx.Tx, cartID int64) error {
 	const query = `
 	DELETE FROM cart_items 
 	WHERE cart_id = $1;
 	`
 
-	_, err = tx.Exec(ctx, query, cartID)
+	_, err := tx.Exec(ctx, query, cartID)
 	if err != nil {
 		return fmt.Errorf("postgres deleteCartItems: %w", err)
 	}
 	return nil
 }
 
-func (r *CheckoutRepository) deleteCart(ctx context.Context, tx pgx.Tx, err error, cartID int64) error {
+func (r *CheckoutRepository) deleteCart(ctx context.Context, tx pgx.Tx, cartID int64) error {
 	const query = `
 	DELETE FROM carts 
 	WHERE id = $1;
 	`
 
-	_, err = tx.Exec(ctx, query, cartID)
+	_, err := tx.Exec(ctx, query, cartID)
 	if err != nil {
 		return fmt.Errorf("postgres deleteCart: %w", err)
 	}
