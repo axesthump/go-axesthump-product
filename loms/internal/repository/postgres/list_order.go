@@ -16,6 +16,7 @@ func (r *LomsRepository) ListOrder(ctx context.Context, orderID int64) (models.O
 	if err != nil {
 		return models.OrderInfo{}, fmt.Errorf("postgres ListOrder select: %w", err)
 	}
+	defer rows.Close()
 
 	items := make([]models.Item, 0, 5)
 	orderInfo := models.OrderInfo{
@@ -29,7 +30,6 @@ func (r *LomsRepository) ListOrder(ctx context.Context, orderID int64) (models.O
 		}
 		orderInfo.Items = append(orderInfo.Items, item)
 	}
-	rows.Close()
 
 	return orderInfo, nil
 }

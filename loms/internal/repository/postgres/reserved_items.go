@@ -74,7 +74,7 @@ func (r *LomsRepository) getOrdersSetData(ctx context.Context, tx pgx.Tx, orderI
 	if err != nil {
 		return nil, fmt.Errorf("postgres getOrdersSetData select: %w", err)
 	}
-
+	defer rows.Close()
 	ordersSetData := make([]orderSetData, 0)
 	for rows.Next() {
 		var orderSetInfo orderSetData
@@ -85,7 +85,6 @@ func (r *LomsRepository) getOrdersSetData(ctx context.Context, tx pgx.Tx, orderI
 		}
 		ordersSetData = append(ordersSetData, orderSetInfo)
 	}
-	rows.Close()
 	return ordersSetData, nil
 }
 
