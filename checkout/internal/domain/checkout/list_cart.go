@@ -33,6 +33,11 @@ func (s *Service) ListCart(ctx context.Context, user int64) (models.CartInfo, er
 	if err != nil {
 		return models.CartInfo{}, fmt.Errorf("get products: %w", err)
 	}
+	return s.getCartInfo(items, products)
+
+}
+
+func (s *Service) getCartInfo(items []models.Item, products []models.Product) (models.CartInfo, error) {
 	cartInfo := models.CartInfo{Items: items}
 	for i, product := range products {
 		cartInfo.TotalPrice += product.Price * items[i].Count
@@ -40,5 +45,4 @@ func (s *Service) ListCart(ctx context.Context, user int64) (models.CartInfo, er
 		cartInfo.Items[i].Price = product.Price
 	}
 	return cartInfo, nil
-
 }

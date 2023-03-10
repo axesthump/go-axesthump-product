@@ -2,10 +2,10 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS warehouses
 (
-    warehouse_id serial primary key
+    id serial primary key
 );
 
-INSERT INTO warehouses(warehouse_id)
+INSERT INTO warehouses(id)
 values (1),
        (2),
        (3);

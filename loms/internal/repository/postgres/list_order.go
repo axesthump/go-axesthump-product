@@ -2,18 +2,19 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 	"route256/loms/internal/models"
 )
 
 func (r *LomsRepository) ListOrder(ctx context.Context, orderID int64) (models.OrderInfo, error) {
-	query := `SELECT o.status, o.user_id, item_sku, items_count
+	query := `SELECT o.status, o.user_id, sku, count
 	FROM orders o
-	INNER JOIN orders_set os on o.order_id = os.order_id
-	WHERE o.order_id = $1;`
+	INNER JOIN order_items oi on o.id = oi.order_id
+	WHERE o.id = $1;`
 
 	rows, err := r.pool.Query(ctx, query, orderID)
 	if err != nil {
-		return models.OrderInfo{}, err
+		return models.OrderInfo{}, fmt.Errorf("postgres ListOrder select: %w", err)
 	}
 
 	items := make([]models.Item, 0, 5)
@@ -24,7 +25,7 @@ func (r *LomsRepository) ListOrder(ctx context.Context, orderID int64) (models.O
 		item := models.Item{}
 		err = rows.Scan(&orderInfo.Status, &orderInfo.User, &item.Sku, &item.Count)
 		if err != nil {
-			return models.OrderInfo{}, err
+			return models.OrderInfo{}, fmt.Errorf("postgres ListOrder scan: %w", err)
 		}
 		orderInfo.Items = append(orderInfo.Items, item)
 	}

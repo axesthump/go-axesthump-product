@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS carts (
-    cart_id serial primary key,
+    id serial primary key,
     user_id bigint not null
 );
 

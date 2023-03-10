@@ -9,7 +9,7 @@ import (
 func (s *Service) Purchase(ctx context.Context, user int64) (int64, error) {
 	items, err := s.repository.ListCart(ctx, user)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("purchase: %w", err)
 	}
 	itemsOrder := make([]models.CreateOrderItem, len(items))
 	for i := range items {

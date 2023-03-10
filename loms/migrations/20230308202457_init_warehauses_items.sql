@@ -2,18 +2,18 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS warehouses_items
 (
-    warehouse_items_id serial primary key,
-    item_sku           bigint not null,
-    available          int4   not null,
-    reserved           int4   not null,
-    bought             int4   not null,
-    warehouse_id       bigint not null
+    sku          bigint,
+    available    int4 not null,
+    reserved     int4 not null,
+    bought       int4 not null,
+    warehouse_id bigint,
+    PRIMARY KEY (sku, warehouse_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_item_sku ON warehouses_items (item_sku);
+CREATE INDEX IF NOT EXISTS idx_item_sku ON warehouses_items (sku);
 CREATE INDEX IF NOT EXISTS idx_warehouse_id ON warehouses_items (warehouse_id);
 
-INSERT INTO warehouses_items (item_sku, available, reserved, bought, warehouse_id)
+INSERT INTO warehouses_items (sku, available, reserved, bought, warehouse_id)
 VALUES (1076963, 3, 0, 0, 1),
        (1148162, 3, 0, 0, 1),
        (1625903, 3, 0, 0, 1),

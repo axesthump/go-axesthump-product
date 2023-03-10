@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS orders
 (
-    order_id serial primary key,
+    id serial primary key,
     status   int    not null,
     user_id  bigint not null
 );

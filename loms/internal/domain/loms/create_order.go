@@ -11,7 +11,9 @@ func (s *Service) CreateOrder(ctx context.Context, order models.OrderData) (int6
 		return 0, err
 	}
 
-	//todo резервация пока создается в отдельной горутине без обработок ошибок и прочего (будет на следующих воркшопах)
-	go s.repository.ReservedItems(context.Background(), orderID)
+	err = s.repository.ReservedItems(ctx, orderID)
+	if err != nil {
+		return 0, err
+	}
 	return orderID, nil
 }

@@ -8,7 +8,7 @@ import (
 type Repository interface {
 	CreateOrder(ctx context.Context, order models.OrderData) (int64, error)
 	Stocks(ctx context.Context, sku uint32) ([]models.Stock, error)
-	ReservedItems(ctx context.Context, orderID int64)
+	ReservedItems(ctx context.Context, orderID int64) error
 	ListOrder(ctx context.Context, orderID int64) (models.OrderInfo, error)
 	OrderPayed(ctx context.Context, orderID int64) error
 	CancelOrder(ctx context.Context, orderID int64) error
