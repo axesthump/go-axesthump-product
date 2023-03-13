@@ -6,5 +6,14 @@ import (
 )
 
 func (s *Service) CreateOrder(ctx context.Context, order models.OrderData) (int64, error) {
-	return 42, nil
+	orderID, err := s.repository.CreateOrder(ctx, order)
+	if err != nil {
+		return 0, err
+	}
+
+	err = s.repository.ReservedItems(ctx, orderID)
+	if err != nil {
+		return 0, err
+	}
+	return orderID, nil
 }

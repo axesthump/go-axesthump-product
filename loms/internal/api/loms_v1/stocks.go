@@ -2,6 +2,7 @@ package loms_v1
 
 import (
 	"context"
+	"log"
 	"route256/loms/internal/models"
 	desc "route256/loms/pkg/loms_v1"
 )
@@ -9,6 +10,7 @@ import (
 func (h *Handler) Stocks(ctx context.Context, r *desc.StocksRequest) (*desc.StocksResponse, error) {
 	stocks, err := h.service.Stocks(ctx, r.GetSku())
 	if err != nil {
+		log.Println(err.Error())
 		return nil, err
 	}
 	res := ToStocksDesc(stocks)

@@ -2,6 +2,7 @@ package loms_v1
 
 import (
 	"context"
+	"log"
 	"route256/loms/internal/models"
 	desc "route256/loms/pkg/loms_v1"
 )
@@ -9,6 +10,7 @@ import (
 func (h *Handler) ListOrder(ctx context.Context, r *desc.ListOrderRequest) (*desc.ListOrderResponse, error) {
 	orderInfo, err := h.service.ListOrder(ctx, r.GetOrderID())
 	if err != nil {
+		log.Println(err.Error())
 		return nil, err
 	}
 	res := toOrderInfoDesc(orderInfo)
@@ -38,7 +40,7 @@ func toItemDesc(items []models.Item) []*desc.Item {
 	return descItems
 }
 
-func getStatusDesc(status models.OrderStatus) desc.OrderStatus {
+func getStatusDesc(status models.OrderStatusID) desc.OrderStatus {
 	switch status {
 	case models.New:
 		return desc.OrderStatus_new

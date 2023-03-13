@@ -3,6 +3,7 @@ package checkout_v1
 import (
 	"context"
 	"fmt"
+	"log"
 	desc "route256/checkout/pkg/checkout_v1"
 )
 
@@ -13,6 +14,7 @@ func (h *Handler) AddToCart(ctx context.Context, r *desc.AddToCartRequest) (*des
 	}
 	err := h.service.AddToCart(ctx, productInfo.GetUser(), productInfo.GetSku(), productInfo.GetCount())
 	if err != nil {
+		log.Println(err.Error())
 		return nil, err
 	}
 	return &desc.EmptyMessage{}, nil

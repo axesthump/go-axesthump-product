@@ -1,16 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"route256/checkout/internal/api/checkout_v1"
 	lomsService "route256/checkout/internal/client/grpc/loms_service"
 	productService "route256/checkout/internal/client/grpc/product_service"
 	"route256/checkout/internal/config"
 	"route256/checkout/internal/domain/checkout"
+	"route256/checkout/internal/repository/postgres"
 	desc "route256/checkout/pkg/checkout_v1"
 
+	"github.com/jackc/pgx/v4/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
@@ -50,7 +54,17 @@ func main() {
 	defer productServiceConn.Close()
 	productServiceClient := productService.New(productServiceConn)
 
-	service := checkout.New(lomsClient, productServiceClient, lomsClient)
+	psqlConn := config.ConfigData.Postgres.Url
+	ctx := context.Background()
+	pool, err := pgxpool.Connect(ctx, psqlConn)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
+		os.Exit(1)
+	}
+	defer pool.Close()
+	repository := postgres.New(pool)
+
+	service := checkout.New(lomsClient, productServiceClient, lomsClient, repository)
 	desc.RegisterCheckoutV1Server(s, checkout_v1.New(service))
 	log.Printf("server listening at %v", l.Addr())
 

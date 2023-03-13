@@ -3,6 +3,7 @@ package loms_v1
 import (
 	"context"
 	"fmt"
+	"log"
 	"route256/loms/internal/models"
 	desc "route256/loms/pkg/loms_v1"
 )
@@ -10,10 +11,12 @@ import (
 func (h *Handler) CreateOrder(ctx context.Context, r *desc.CreateOrderRequest) (*desc.CreateOrderResponse, error) {
 	orderInfo, err := toOrderData(r)
 	if err != nil {
+		log.Println(err.Error())
 		return nil, err
 	}
 	orderID, err := h.service.CreateOrder(ctx, orderInfo)
 	if err != nil {
+		log.Println(err.Error())
 		return nil, err
 	}
 	return &desc.CreateOrderResponse{OrderID: orderID}, nil

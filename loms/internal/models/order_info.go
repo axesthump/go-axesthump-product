@@ -1,7 +1,7 @@
 package models
 
 type OrderInfo struct {
-	Status OrderStatus
+	Status OrderStatusID
 	User   int64
 	Items  []Item
 }
