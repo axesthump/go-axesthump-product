@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 )
 
 var (
@@ -16,7 +15,6 @@ func (s *Service) AddToCart(ctx context.Context, user int64, sku uint32, count u
 	if err != nil {
 		return fmt.Errorf("checking stocksChecker: %w", err)
 	}
-	log.Printf("%+v", stocks)
 	counter := int64(count)
 	for _, stock := range stocks {
 		counter -= int64(stock.Count)

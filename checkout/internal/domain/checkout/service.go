@@ -10,7 +10,7 @@ type StocksChecker interface {
 }
 
 type ProductsChecker interface {
-	GetProducts(ctx context.Context, skus []uint32) ([]models.Product, error)
+	GetProduct(ctx context.Context, sku uint32) (models.Product, error)
 }
 
 type CreateOrderChecker interface {
@@ -26,7 +26,7 @@ type Repository interface {
 
 type Service struct {
 	stocksChecker      StocksChecker
-	productsChecker    ProductsChecker
+	productChecker     ProductsChecker
 	createOrderChecker CreateOrderChecker
 	repository         Repository
 }
@@ -39,7 +39,7 @@ func New(
 ) *Service {
 	return &Service{
 		stocksChecker:      stocksChecker,
-		productsChecker:    productsChecker,
+		productChecker:     productsChecker,
 		createOrderChecker: createOrderChecker,
 		repository:         repository,
 	}

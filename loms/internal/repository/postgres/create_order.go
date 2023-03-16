@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"route256/loms/internal/models"
+	"time"
 
 	"github.com/jackc/pgx/v4"
 )
@@ -11,12 +12,12 @@ import (
 func (r *LomsRepository) CreateOrder(ctx context.Context, order models.OrderData) (orderID int64, err error) {
 	err = r.inTx(ctx, func(ctx context.Context, tx pgx.Tx) error {
 		const query = `
-		INSERT INTO orders (status, user_id) 
-		VALUES ($1, $2) 
+		INSERT INTO orders (status, create_at, user_id) 
+		VALUES ($1, $2, $3) 
 		RETURNING id;
 		`
 
-		err = tx.QueryRow(ctx, query, models.New, order.User).Scan(&orderID)
+		err = tx.QueryRow(ctx, query, models.New, time.Now(), order.User).Scan(&orderID)
 		if err != nil {
 			return err
 		}
