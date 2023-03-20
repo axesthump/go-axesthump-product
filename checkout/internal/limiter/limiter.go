@@ -2,26 +2,20 @@ package limiter
 
 import (
 	"context"
-	"sync"
 	"time"
 )
 
 type Limiter struct {
-	countRequestInSecond int           // кол-во запросов, стоящие в очереди
-	countRequestLimit    int           // ограничение на количество запросов в секунду
-	ch                   chan struct{} // очередь
-	t                    *time.Ticker
-	*sync.Mutex
+	ch chan struct{}
+	t  *time.Ticker
 }
 
 func New(countRequestLimit int) *Limiter {
 	limiter := &Limiter{
-		countRequestLimit: countRequestLimit,
-		ch:                make(chan struct{}),
-		t:                 time.NewTicker(time.Second),
-		Mutex:             &sync.Mutex{},
+		ch: make(chan struct{}, countRequestLimit),
+		t:  time.NewTicker(time.Second / time.Duration(countRequestLimit)),
 	}
-	go limiter.resetCountRequestInSecond() // запускаем процесс обработки очереди
+	go limiter.resetCountRequestInSecond()
 	return limiter
 }
 
@@ -29,33 +23,18 @@ func (l *Limiter) resetCountRequestInSecond() {
 	for {
 		_, ok := <-l.t.C
 		if !ok {
-			return // выходим если таймер уже закрылся по контексту
+			return
 		}
-		l.Lock()                                          // локаем для проверки очереди
-		needToRead := l.countRequestInSecond              // предпологаем, что нужно сдвинуть очередь на кол-во народу в ней
-		if l.countRequestInSecond > l.countRequestLimit { // если кол-во народу в очереди больше, то продвигаем только необходимый нам лимит
-			needToRead = l.countRequestLimit
-		}
-		for i := 0; i < needToRead; i++ { // продвигаем очередь
-			<-l.ch
-			l.countRequestInSecond--
-		}
-		l.Unlock() // отпускаем лок
+		l.ch <- struct{}{}
 	}
 }
 
 func (l *Limiter) Wait(ctx context.Context) error {
-	l.Lock()
-	l.countRequestInSecond++
-	l.Unlock()
 
 	select {
-	case l.ch <- struct{}{}: // встаем в очередь
+	case <-l.ch:
 		return nil
-	case <-ctx.Done(): // выходим из очередь по отвалу контекста
-		l.Lock()
-		l.countRequestInSecond--
-		l.Unlock()
+	case <-ctx.Done():
 		return ctx.Err()
 	}
 }

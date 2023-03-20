@@ -46,7 +46,7 @@ func main() {
 	defer lomsConn.Close()
 	lomsClient := lomsService.New(lomsConn)
 
-	lim := limiter.New(5)
+	lim := limiter.New(10)
 	defer lim.Close()
 	productServiceConn, err := grpc.Dial(
 		config.ConfigData.Services.ProductService,
