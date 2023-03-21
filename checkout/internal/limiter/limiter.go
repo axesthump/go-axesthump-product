@@ -12,7 +12,7 @@ type Limiter struct {
 
 func New(countRequestLimit int) *Limiter {
 	limiter := &Limiter{
-		ch: make(chan struct{}, countRequestLimit),
+		ch: make(chan struct{}),
 		t:  time.NewTicker(time.Second / time.Duration(countRequestLimit)),
 	}
 	go limiter.resetCountRequestInSecond()
@@ -30,7 +30,6 @@ func (l *Limiter) resetCountRequestInSecond() {
 }
 
 func (l *Limiter) Wait(ctx context.Context) error {
-
 	select {
 	case <-l.ch:
 		return nil
