@@ -7,21 +7,18 @@ import (
 	productServiceAPI "route256/checkout/pkg/product_service_v1"
 )
 
-func (c *Client) GetProducts(ctx context.Context, skus []uint32) ([]models.Product, error) {
-	products := make([]models.Product, len(skus))
-	for i, sku := range skus {
-		var req = &productServiceAPI.GetProductRequest{
-			Token: config.ConfigData.Token,
-			Sku:   sku,
-		}
-		response, err := c.productServiceClient.GetProduct(ctx, req)
-		if err != nil {
-			return nil, err
-		}
-		products[i] = models.Product{
-			Name:  response.GetName(),
-			Price: response.GetPrice(),
-		}
+func (c *Client) GetProduct(ctx context.Context, sku uint32) (models.Product, error) {
+	var req = &productServiceAPI.GetProductRequest{
+		Token: config.ConfigData.Token,
+		Sku:   sku,
 	}
-	return products, nil
+	response, err := c.productServiceClient.GetProduct(ctx, req)
+	if err != nil {
+		return models.Product{}, err
+	}
+	product := models.Product{
+		Name:  response.GetName(),
+		Price: response.GetPrice(),
+	}
+	return product, nil
 }

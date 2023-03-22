@@ -9,6 +9,7 @@ import (
 	lomsV1 "route256/loms/internal/api/loms_v1"
 	"route256/loms/internal/config"
 	"route256/loms/internal/domain/loms"
+	reservationChecker "route256/loms/internal/domain/reservationchecker"
 	"route256/loms/internal/repository/postgres"
 	desc "route256/loms/pkg/loms_v1"
 
@@ -46,6 +47,8 @@ func main() {
 	desc.RegisterLomsV1Server(s, lomsV1.New(service))
 	log.Printf("server listening at %v", l.Addr())
 
+	reservChecker := reservationChecker.New(ctx, repository)
+	defer reservChecker.Stop()
 	if err = s.Serve(l); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

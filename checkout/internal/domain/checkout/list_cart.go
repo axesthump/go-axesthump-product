@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"route256/checkout/internal/models"
+	"route256/checkout/internal/pool"
 )
 
 //skus := []uint32{
@@ -24,25 +25,26 @@ func (s *Service) ListCart(ctx context.Context, user int64) (models.CartInfo, er
 	if err != nil {
 		return models.CartInfo{}, fmt.Errorf("get products: %w", err)
 	}
-	skus := make([]uint32, len(items))
-	for i := range items {
-		skus[i] = items[i].Sku
-	}
 
-	products, err := s.productsChecker.GetProducts(ctx, skus)
-	if err != nil {
-		return models.CartInfo{}, fmt.Errorf("get products: %w", err)
-	}
-	return s.getCartInfo(items, products)
+	workerPool := pool.New(ctx, s.productChecker, 5)
+	workerPool.Submit(items)
+	fillItems := make([]models.Item, 0, len(items))
 
+	for i := 0; i < len(items); i++ {
+		select {
+		case item := <-workerPool.Out:
+			fillItems = append(fillItems, item)
+		case err = <-workerPool.Err:
+			return models.CartInfo{}, err
+		}
+	}
+	return s.getCartInfo(fillItems)
 }
 
-func (s *Service) getCartInfo(items []models.Item, products []models.Product) (models.CartInfo, error) {
+func (s *Service) getCartInfo(items []models.Item) (models.CartInfo, error) {
 	cartInfo := models.CartInfo{Items: items}
-	for i, product := range products {
-		cartInfo.TotalPrice += product.Price * items[i].Count
-		cartInfo.Items[i].Name = product.Name
-		cartInfo.Items[i].Price = product.Price
+	for _, item := range items {
+		cartInfo.TotalPrice += item.Price * item.Count
 	}
 	return cartInfo, nil
 }

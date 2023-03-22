@@ -2,9 +2,10 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS orders
 (
-    id serial primary key,
-    status   int    not null,
-    user_id  bigint not null
+    id        serial primary key,
+    status    int       not null,
+    create_at timestamp not null,
+    user_id   bigint    not null
 );
 
 CREATE INDEX IF NOT EXISTS idx_user_id ON orders (user_id);

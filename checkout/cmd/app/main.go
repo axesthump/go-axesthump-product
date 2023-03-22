@@ -11,6 +11,8 @@ import (
 	productService "route256/checkout/internal/client/grpc/product_service"
 	"route256/checkout/internal/config"
 	"route256/checkout/internal/domain/checkout"
+	"route256/checkout/internal/interceptors"
+	"route256/checkout/internal/limiter"
 	"route256/checkout/internal/repository/postgres"
 	desc "route256/checkout/pkg/checkout_v1"
 
@@ -44,9 +46,12 @@ func main() {
 	defer lomsConn.Close()
 	lomsClient := lomsService.New(lomsConn)
 
+	lim := limiter.New(10)
+	defer lim.Close()
 	productServiceConn, err := grpc.Dial(
 		config.ConfigData.Services.ProductService,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(interceptors.LimitInterceptor(lim)),
 	)
 	if err != nil {
 		log.Fatalf("failed to connect to server: %v", err)
