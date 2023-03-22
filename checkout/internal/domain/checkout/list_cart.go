@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"route256/checkout/internal/models"
-	"route256/checkout/internal/pool"
 )
 
 //skus := []uint32{
@@ -26,17 +25,9 @@ func (s *Service) ListCart(ctx context.Context, user int64) (models.CartInfo, er
 		return models.CartInfo{}, fmt.Errorf("get products: %w", err)
 	}
 
-	workerPool := pool.New(ctx, s.productChecker, 5)
-	workerPool.Submit(items)
-	fillItems := make([]models.Item, 0, len(items))
-
-	for i := 0; i < len(items); i++ {
-		select {
-		case item := <-workerPool.Out:
-			fillItems = append(fillItems, item)
-		case err = <-workerPool.Err:
-			return models.CartInfo{}, err
-		}
+	fillItems, err := s.productInfoGetter.GetProductsInfo(ctx, items)
+	if err != nil {
+		return models.CartInfo{}, fmt.Errorf("get products fill items: %w", err)
 	}
 	return s.getCartInfo(fillItems)
 }

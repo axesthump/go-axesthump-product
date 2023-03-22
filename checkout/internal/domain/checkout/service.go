@@ -1,5 +1,10 @@
 package checkout
 
+//go:generate minimock -i Repository -o ./mocks/ -s "_minimock.go"
+//go:generate minimock -i ProductInfoGetter -o ./mocks/ -s "_minimock.go"
+//go:generate minimock -i CreateOrderChecker -o ./mocks/ -s "_minimock.go"
+//go:generate minimock -i StocksChecker -o ./mocks/ -s "_minimock.go"
+
 import (
 	"context"
 	"route256/checkout/internal/models"
@@ -9,12 +14,12 @@ type StocksChecker interface {
 	Stocks(ctx context.Context, sku uint32) ([]models.Stock, error)
 }
 
-type ProductsChecker interface {
-	GetProduct(ctx context.Context, sku uint32) (models.Product, error)
-}
-
 type CreateOrderChecker interface {
 	CreateOrder(ctx context.Context, user int64, items []models.CreateOrderItem) (int64, error)
+}
+
+type ProductInfoGetter interface {
+	GetProductsInfo(ctx context.Context, items []models.Item) ([]models.Item, error)
 }
 
 type Repository interface {
@@ -26,21 +31,21 @@ type Repository interface {
 
 type Service struct {
 	stocksChecker      StocksChecker
-	productChecker     ProductsChecker
 	createOrderChecker CreateOrderChecker
 	repository         Repository
+	productInfoGetter  ProductInfoGetter
 }
 
 func New(
 	stocksChecker StocksChecker,
-	productsChecker ProductsChecker,
 	createOrderChecker CreateOrderChecker,
+	productInfoGetter ProductInfoGetter,
 	repository Repository,
 ) *Service {
 	return &Service{
 		stocksChecker:      stocksChecker,
-		productChecker:     productsChecker,
 		createOrderChecker: createOrderChecker,
+		productInfoGetter:  productInfoGetter,
 		repository:         repository,
 	}
 

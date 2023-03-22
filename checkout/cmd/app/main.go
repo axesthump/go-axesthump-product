@@ -11,6 +11,7 @@ import (
 	productService "route256/checkout/internal/client/grpc/product_service"
 	"route256/checkout/internal/config"
 	"route256/checkout/internal/domain/checkout"
+	"route256/checkout/internal/domain/productinfogetter"
 	"route256/checkout/internal/interceptors"
 	"route256/checkout/internal/limiter"
 	"route256/checkout/internal/repository/postgres"
@@ -69,7 +70,8 @@ func main() {
 	defer pool.Close()
 	repository := postgres.New(pool)
 
-	service := checkout.New(lomsClient, productServiceClient, lomsClient, repository)
+	productInfoGetter := productinfogetter.New(productServiceClient)
+	service := checkout.New(lomsClient, lomsClient, productInfoGetter, repository)
 	desc.RegisterCheckoutV1Server(s, checkout_v1.New(service))
 	log.Printf("server listening at %v", l.Addr())
 

@@ -1,5 +1,7 @@
 package loms
 
+//go:generate minimock -i Repository -o ./mocks/ -s "_minimock.go"
+
 import (
 	"context"
 	"route256/loms/internal/models"
