@@ -10,6 +10,11 @@ func (h *Handler) Purchase(ctx context.Context, r *desc.PurchaseRequest) (*desc.
 	orderID, err := h.service.Purchase(ctx, r.GetUser())
 	if err != nil {
 		log.Println(err.Error())
+		if orderID != 0 {
+			return &desc.PurchaseResponse{
+				OrderID: orderID,
+			}, nil
+		}
 		return nil, err
 	}
 	return &desc.PurchaseResponse{
