@@ -25,6 +25,10 @@ func (r *LomsRepository) CreateOrder(ctx context.Context, order models.OrderData
 		if err != nil {
 			return err
 		}
+		err = r.saveInOutbox(ctx, tx, orderID, models.New)
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 

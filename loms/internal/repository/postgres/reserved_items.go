@@ -57,6 +57,10 @@ func (r *LomsRepository) ReservedItems(ctx context.Context, orderID int64) error
 		if err != nil {
 			return err
 		}
+		err = r.saveInOutbox(ctx, tx, orderID, models.AwaitingPayment)
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 	if err != nil {
@@ -143,6 +147,10 @@ func (r *LomsRepository) getPossibleReservedItemsInfo(
 
 		if orderSetInfo.count > 0 {
 			err = r.updateStatus(ctx, tx, models.Failed, orderID)
+			if err != nil {
+				return nil, fmt.Errorf("postgres getPossibleReservedItemsInfo: %w", err)
+			}
+			err = r.saveInOutbox(ctx, tx, orderID, models.Failed)
 			if err != nil {
 				return nil, fmt.Errorf("postgres getPossibleReservedItemsInfo: %w", err)
 			}
