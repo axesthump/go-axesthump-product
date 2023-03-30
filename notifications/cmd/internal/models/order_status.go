@@ -11,7 +11,7 @@ const (
 	Cancelled
 )
 
-func GetName(id OrderStatusID) string {
+func (id OrderStatusID) GetName() string {
 	switch id {
 	case UnknownOrderStatusID:
 		return "Unknown order status id"

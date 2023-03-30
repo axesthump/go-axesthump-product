@@ -41,7 +41,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 			if err != nil {
 				log.Println("Unmarshall err:", err.Error())
 			} else {
-				log.Printf("Order: %d. New status: %s", order.OrderID, models.GetName(order.Status))
+				log.Printf("Order: %d. New status: %s", order.OrderID, order.Status.GetName())
 				session.MarkMessage(message, "")
 			}
 		case <-session.Context().Done():

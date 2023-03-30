@@ -2,10 +2,11 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS outbox_orders
 (
-    id       serial primary key,
-    order_id bigint not null,
-    status   int    not null,
-    is_send  bool   not null default false
+    id          serial primary key,
+    order_id    bigint not null,
+    status      int    not null,
+    send_status int    not null default 1,
+    err_message text   not null default ''
 );
 
 -- +goose StatementEnd

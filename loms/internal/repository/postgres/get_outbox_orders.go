@@ -10,14 +10,15 @@ func (r *LomsRepository) GetOutboxOrders(ctx context.Context) ([]models.OutboxOr
 	const query = `
 	SELECT id, order_id, status
 	FROM outbox_orders
-	WHERE is_send = false
+	WHERE send_status = $1
 	ORDER BY id;
 	`
 
-	rows, err := r.pool.Query(ctx, query)
+	rows, err := r.pool.Query(ctx, query, models.Open)
 	if err != nil {
 		return nil, fmt.Errorf("GetOutboxOrders: %w", err)
 	}
+	defer rows.Close()
 	outboxOrders := make([]models.OutboxOrder, 0, 10)
 	for rows.Next() {
 		outboxOrder := models.OutboxOrder{}
@@ -27,5 +28,13 @@ func (r *LomsRepository) GetOutboxOrders(ctx context.Context) ([]models.OutboxOr
 		}
 		outboxOrders = append(outboxOrders, outboxOrder)
 	}
-	return outboxOrders, nil
+	ids := make([]int64, len(outboxOrders))
+	for i, order := range outboxOrders {
+		ids[i] = order.ID
+	}
+	err = r.UpdateOutboxOrders(ctx, ids, models.InProgress)
+	if err != nil {
+		return nil, fmt.Errorf("UpdateOutboxOrders: %w", err)
+	}
+	return outboxOrders, rows.Err()
 }
