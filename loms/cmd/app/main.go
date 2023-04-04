@@ -10,7 +10,9 @@ import (
 	"route256/loms/internal/config"
 	"route256/loms/internal/domain/loms"
 	reservationChecker "route256/loms/internal/domain/reservationchecker"
+	"route256/loms/internal/kafka"
 	"route256/loms/internal/repository/postgres"
+	sender2 "route256/loms/internal/sender"
 	desc "route256/loms/pkg/loms_v1"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -19,6 +21,12 @@ import (
 )
 
 const port = ":8081"
+
+var brokers = []string{
+	"kafka1:29091",
+	"kafka2:29092",
+	"kafka3:29093",
+}
 
 func main() {
 	l, err := net.Listen("tcp", fmt.Sprintf("%v", port))
@@ -49,6 +57,15 @@ func main() {
 
 	reservChecker := reservationChecker.New(ctx, repository)
 	defer reservChecker.Stop()
+
+	producer, err := kafka.NewSyncProducer(brokers)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	sender := sender2.NewOrderSender(ctx, producer, "orderss", 1, repository)
+	sender.Run()
+
 	if err = s.Serve(l); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

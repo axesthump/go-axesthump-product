@@ -24,7 +24,10 @@ func (r *LomsRepository) OrderPayed(ctx context.Context, orderID int64) error {
 		if err != nil {
 			return err
 		}
-
+		err = r.saveInOutbox(ctx, tx, orderID, models.Payed)
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 	if err != nil {
